@@ -1,0 +1,110 @@
+
+<style>
+#erd { padding: 1rem 0; }
+#erd svg { max-width: 100%; }
+</style>
+<div id="erd"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+    primaryColor: dark ? '#2a2a28' : '#f1efea',
+    primaryBorderColor: dark ? '#5f5e5a' : '#b4b2a9',
+    primaryTextColor: dark ? '#c2c0b6' : '#3d3d3a',
+    attributeBackgroundColorEven: dark ? '#232321' : '#f8f7f4',
+    attributeBackgroundColorOdd: dark ? '#2c2c2a' : '#ffffff',
+  },
+});
+
+const diagram = `erDiagram
+  Role {
+    bigint id PK
+    varchar name
+  }
+
+  VisitStatus {
+    bigint id PK
+    varchar name
+  }
+
+  Site {
+    bigint id PK
+    varchar name
+    varchar location
+  }
+
+  Zone {
+    bigint id PK
+    varchar name
+    bigint site_id FK
+  }
+
+  User {
+    bigint id PK
+    varchar name
+    varchar email
+    varchar password_hash
+    bigint role_id FK
+    bigint site_id FK
+  }
+
+  Visitor {
+    bigint id PK
+    varchar name
+    varchar phone
+    bigint site_id FK
+    bigint zone_id FK
+    bigint host_id FK
+    bigint created_by FK
+    bigint visit_status_id FK
+    timestamp check_in_time
+    timestamp check_out_time
+  }
+
+  Site ||--o{ Zone : "has"
+  Site ||--o{ User : "belongs to"
+  Site ||--o{ Visitor : "logged at"
+  Zone ||--o{ Visitor : "visiting"
+  Role ||--o{ User : "assigned to"
+  User ||--o{ Visitor : "hosts"
+  User ||--o{ Visitor : "created by"
+  VisitStatus ||--o{ Visitor : "status"
+`;
+
+const { svg } = await mermaid.render('erd-svg', diagram);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg .row-rect-odd path, #erd svg .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+</script>
