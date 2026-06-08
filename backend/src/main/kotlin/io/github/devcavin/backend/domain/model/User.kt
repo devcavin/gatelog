@@ -17,15 +17,16 @@ import java.util.UUID
 @Entity
 @Table(name = "users")
 class User(
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
-    var id: UUID? = null,
+    override var id: UUID? = null,
 
     @Column(nullable = false, length = 100)
     var name: String,
 
-    @Email(message = "Please provide a valid email")
+    @Email
     @Column(nullable = false, length = 150, unique = true)
     var email: String,
 
@@ -46,5 +47,4 @@ class User(
 
     @Column(name = "is_active", nullable = false)
     var isActive: Boolean = true
-) {
-}
+) : BaseEntity()

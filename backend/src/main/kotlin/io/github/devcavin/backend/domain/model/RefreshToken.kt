@@ -20,7 +20,7 @@ class RefreshToken(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
-    var id: UUID? = null,
+    override var id: UUID? = null,
 
     @Column(nullable = false, unique = true, length = 255)
     var token: String,
@@ -35,4 +35,4 @@ class RefreshToken(
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: OffsetDateTime = OffsetDateTime.now()
-) {}
+) : BaseEntity()
