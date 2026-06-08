@@ -11,24 +11,15 @@ import java.util.UUID
 @Entity
 @Table(name = "visit_statuses")
 class VisitStatus(
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
-    var id: UUID? = null,
+    override var id: UUID? = null,
 
     @Column(nullable = false, length = 100, unique = true)
     var name: String
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Role) return false
-
-        return id != null && id == other.id
-    }
-
-    override fun hashCode(): Int =
-        id?.hashCode() ?: System.identityHashCode(this)
-
+) : BaseEntity() {
 
     override fun toString(): String {
         return "VisitStatus(id=$id, name='$name')"

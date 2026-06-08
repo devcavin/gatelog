@@ -19,7 +19,7 @@ class Visitor(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
-    var id: UUID? = null,
+    override var id: UUID? = null,
 
     @Column(nullable = false, length = 100)
     var name: String,
@@ -54,4 +54,4 @@ class Visitor(
 
     @Column(name = "check_out_time")
     var checkOutTime: OffsetDateTime? = null
-) {}
+) : BaseEntity()

@@ -18,10 +18,11 @@ import java.util.UUID
     uniqueConstraints = [UniqueConstraint(name = "uq_zones_site_name", columnNames = ["site_id", "name"])]
 )
 class Zone(
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
-    var id: UUID? = null,
+    override var id: UUID? = null,
 
     @Column(nullable = false, length = 100)
     var name: String,
@@ -29,5 +30,4 @@ class Zone(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     var site: Site
-) {
-}
+) : BaseEntity()
