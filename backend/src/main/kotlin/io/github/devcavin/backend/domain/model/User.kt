@@ -1,18 +1,9 @@
 package io.github.devcavin.backend.domain.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.*
 import jakarta.validation.constraints.Email
-import org.hibernate.annotations.CreationTimestamp
-import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "users")
@@ -30,6 +21,7 @@ class User(
     @Column(nullable = false, length = 150, unique = true)
     var email: String,
 
+    @JsonIgnore
     @Column(name ="password_hash", nullable = false, length = 255)
     var passwordHash: String,
 
@@ -40,10 +32,6 @@ class User(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     var site: Site,
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false)
-    var createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column(name = "is_active", nullable = false)
     var isActive: Boolean = true
