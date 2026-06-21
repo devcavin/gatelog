@@ -61,7 +61,7 @@ jobs:
           id: meta
           uses: docker/metadata-action@v5
           with:
-            images: gchr.io/${{ github.repository_owner }}/gatelog-backend
+            images: ghcr.io/${{ github.repository_owner }}/gatelog-backend
             tags: |
               type=sha,prefix=,format=short
               type=raw,value=latest
