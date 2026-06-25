@@ -4,7 +4,9 @@ import io.github.devcavin.backend.domain.model.VisitStatus
 import io.github.devcavin.backend.domain.model.Visitor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -12,7 +14,7 @@ import java.time.OffsetDateTime
 import java.util.*
 
 @Repository
-interface VisitorRepository : JpaRepository<Visitor, UUID> {
+interface VisitorRepository : JpaRepository<Visitor, UUID>, JpaSpecificationExecutor<Visitor> {
     // returning visitor lookup by phone within a site
     fun findTopBySiteIdAndPhoneOrderByCheckInTimeDesc(
         siteId: UUID,
@@ -78,4 +80,6 @@ interface VisitorRepository : JpaRepository<Visitor, UUID> {
         siteId: UUID,
         visitStatus: VisitStatus
     ): Long
+
+    // fun findAll(specification: Specification<VisitorSpecification>, pageable: Pageable): Page<Visitor>
 }

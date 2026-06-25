@@ -4,7 +4,6 @@ import io.github.devcavin.backend.common.exception.InvalidStateException
 import io.github.devcavin.backend.common.exception.ResourceNotFoundException
 import io.github.devcavin.backend.domain.model.User
 import io.github.devcavin.backend.domain.model.Visitor
-import io.github.devcavin.backend.domain.repository.UserRepository
 import io.github.devcavin.backend.domain.repository.VisitStatusRepository
 import io.github.devcavin.backend.domain.repository.VisitorRepository
 import io.github.devcavin.backend.domain.repository.VisitorSpecification
@@ -27,8 +26,7 @@ import java.util.UUID
 class VisitorService(
     private val visitorRepository: VisitorRepository,
     private val visitStatusRepository: VisitStatusRepository,
-    private val zoneRepository: ZoneRepository,
-    private val userRepository: UserRepository
+    private val zoneRepository: ZoneRepository
 ) {
 
     @Transactional
@@ -45,16 +43,6 @@ class VisitorService(
                 .also { z ->
                     if (z.site.id != requestedBy.site.id) {
                         throw AccessDeniedException("Zone does not belong to your site")
-                    }
-                }
-        }
-
-        val host = request.hostId?.let {
-            userRepository.findById(it)
-                .orElseThrow { ResourceNotFoundException("User", it) }
-                .also { h ->
-                    if (h.site.id != requestedBy.site.id) {
-                        throw AccessDeniedException("Host does not belong to your site")
                     }
                 }
         }
