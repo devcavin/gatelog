@@ -11,9 +11,9 @@ import io.github.devcavin.backend.security.JwtTokenProvider
 import io.github.devcavin.backend.web.dto.auth.AuthResponse
 import io.github.devcavin.backend.web.dto.auth.AuthenticatedUser
 import io.github.devcavin.backend.web.dto.auth.LoginRequest
-import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 import java.util.UUID
 

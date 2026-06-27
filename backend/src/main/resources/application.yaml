@@ -19,6 +19,9 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 50
+    open-in-view: false
 
   flyway:
     enabled: true
@@ -40,3 +43,7 @@ gatelog:
 
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+  scheduler:
+    overdue-threshold-hours: 2
+    overdue-job-rate-ms: 900000
