@@ -11,10 +11,10 @@ import io.github.devcavin.backend.domain.repository.UserRepository
 import io.github.devcavin.backend.web.dto.user.CreateUserRequest
 import io.github.devcavin.backend.web.dto.user.UserResponse
 import io.github.devcavin.backend.web.dto.user.toResponse
-import jakarta.transaction.Transactional
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
