@@ -28,6 +28,10 @@ class Visitor(
     var phone: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "visitor_profile_id")
+    var visitorProfile: VisitorProfile? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     var site: Site,
 

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 data class RegisterVisitorRequest(
     @field:NotBlank
@@ -58,6 +58,27 @@ data class VisitorSearchParams(
     val to: OffsetDateTime? = null
 )
 
+data class UpdateVisitorProfileRequest(
+    @field:NotBlank
+    @field:Size(max = 100)
+    val name: String,
+
+    @field:NotBlank
+    @field:Pattern(
+        regexp = """^\+?[0-9\s\-]{7,25}$""",
+        message = "Invalid phone number format"
+    )
+    val phoneNumber: String
+)
+
+data class VisitorProfileResponse(
+    val id: UUID,
+    val name: String,
+    val phoneNumber: String,
+    val siteId: UUID,
+    val visitCount: Int
+)
+
 fun Visitor.toResponse() = VisitorResponse(
     id = id!!,
     name = name,
@@ -72,12 +93,4 @@ fun Visitor.toResponse() = VisitorResponse(
     createdByName = createdBy.name,
     checkInTime = checkInTime,
     checkOutTime = checkOutTime
-)
-
-fun Visitor.toReturningResponse() = ReturningVisitorResponse(
-    name = name,
-    phone = phone,
-    visitorType = visitorType,
-    zoneId = zone?.id,
-    zoneName = zone?.name
 )
