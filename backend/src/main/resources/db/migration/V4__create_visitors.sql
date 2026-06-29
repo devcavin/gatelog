@@ -8,8 +8,8 @@ CREATE TABLE visitors (
     visit_status_id UUID NOT NULL REFERENCES visit_statuses(id),
     visitor_type VARCHAR(50) NOT NULL,
     purpose TEXT NOT NULL DEFAULT 'General Visit',
-    check_in_time timestamptz NOT NULL DEFAULT now(),
-    check_out_time timestamptz
+    check_in_time TIMESTAMPTZ NOT NULL DEFAULT now(),
+    check_out_time TIMESTAMPTZ
 );
 
 CREATE INDEX idx_visitors_site_id ON visitors(site_id);

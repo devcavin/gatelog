@@ -81,5 +81,7 @@ interface VisitorRepository : JpaRepository<Visitor, UUID>, JpaSpecificationExec
         visitStatus: VisitStatus
     ): Long
 
+    fun countBySiteIdAndVisitorProfileId(siteId: UUID, profileId: UUID): Long
+
     // fun findAll(specification: Specification<VisitorSpecification>, pageable: Pageable): Page<Visitor>
 }

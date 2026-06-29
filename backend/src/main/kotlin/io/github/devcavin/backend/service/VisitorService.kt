@@ -1,30 +1,25 @@
 package io.github.devcavin.backend.service
 
+import io.github.devcavin.backend.common.exception.ConflictException
 import io.github.devcavin.backend.common.exception.InvalidStateException
 import io.github.devcavin.backend.common.exception.ResourceNotFoundException
 import io.github.devcavin.backend.domain.model.User
 import io.github.devcavin.backend.domain.model.Visitor
-import io.github.devcavin.backend.domain.repository.VisitStatusRepository
-import io.github.devcavin.backend.domain.repository.VisitorRepository
-import io.github.devcavin.backend.domain.repository.VisitorSpecification
-import io.github.devcavin.backend.domain.repository.ZoneRepository
-import io.github.devcavin.backend.web.dto.visitor.RegisterVisitorRequest
-import io.github.devcavin.backend.web.dto.visitor.ReturningVisitorResponse
-import io.github.devcavin.backend.web.dto.visitor.VisitorResponse
-import io.github.devcavin.backend.web.dto.visitor.VisitorSearchParams
-import io.github.devcavin.backend.web.dto.visitor.toResponse
-import io.github.devcavin.backend.web.dto.visitor.toReturningResponse
+import io.github.devcavin.backend.domain.model.VisitorProfile
+import io.github.devcavin.backend.domain.repository.*
+import io.github.devcavin.backend.web.dto.visitor.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
 @Service
 class VisitorService(
     private val visitorRepository: VisitorRepository,
+    private val visitorProfileRepository: VisitorProfileRepository,
     private val visitStatusRepository: VisitStatusRepository,
     private val zoneRepository: ZoneRepository
 ) {
@@ -41,15 +36,26 @@ class VisitorService(
             zoneRepository.findById(it)
                 .orElseThrow { ResourceNotFoundException("Zone", it) }
                 .also { z ->
-                    if (z.site.id != requestedBy.site.id) {
+                    if (z.site.id != requestedBy.site.id)
                         throw AccessDeniedException("Zone does not belong to your site")
-                    }
                 }
         }
+
+        // find or create visitor profile by phone + site
+        val profile = visitorProfileRepository
+            .findBySiteIdAndPhoneNumber(requestedBy.site.id!!, request.phone)
+            ?: visitorProfileRepository.save(
+                VisitorProfile(
+                    name = request.name,
+                    phoneNumber = request.phone,
+                    site = requestedBy.site
+                )
+            )
 
         val visitor = Visitor(
             name = request.name,
             phone = request.phone,
+            visitorProfile = profile,
             site = requestedBy.site,
             zone = zone,
             createdBy = requestedBy,
@@ -102,14 +108,28 @@ class VisitorService(
         return visitorRepository.findAll(spec, pageable).map { it.toResponse() }
     }
 
+
     @Transactional(readOnly = true)
     fun findReturningVisitor(
         requestedBy: User,
         phone: String
     ): ReturningVisitorResponse? {
-        return visitorRepository
-            .findTopBySiteIdAndPhoneOrderByCheckInTimeDesc(requestedBy.site.id!!, phone)
-            ?.toReturningResponse()
+        val profile = visitorProfileRepository
+            .findBySiteIdAndPhoneNumber(requestedBy.site.id!!, phone)
+            ?: return null
+
+        val lastVisit = visitorRepository
+            .findTopBySiteIdAndPhoneOrderByCheckInTimeDesc(
+                requestedBy.site.id!!, phone
+            )
+
+        return ReturningVisitorResponse(
+            name = profile.name,
+            phone = profile.phoneNumber,
+            visitorType = lastVisit?.visitorType ?: "",
+            zoneId = lastVisit?.zone?.id,
+            zoneName = lastVisit?.zone?.name
+        )
     }
 
     private fun enforcesSiteBoundary(requestedBy: User, visitorSiteId: UUID) {
@@ -118,5 +138,44 @@ class VisitorService(
         ) {
             throw AccessDeniedException("Visitor does not belong to your site")
         }
+    }
+
+    @Transactional
+    fun updateProfile(
+        requestedBy: User,
+        profileId: UUID,
+        request: UpdateVisitorProfileRequest
+    ): VisitorProfileResponse {
+        val profile = visitorProfileRepository.findById(profileId)
+            .orElseThrow { ResourceNotFoundException("VisitorProfile", profileId) }
+
+        if (profile.site.id != requestedBy.site.id) {
+            throw AccessDeniedException("Profile does not belong to your site")
+        }
+
+        if (request.phoneNumber != profile.phoneNumber &&
+            visitorProfileRepository.existsBySiteIdAndPhoneNumber(
+                requestedBy.site.id!!, request.phoneNumber
+            )
+        ) {
+            throw ConflictException(
+                "Phone number is already registered at this site"
+            )
+        }
+
+        profile.name = request.name
+        profile.phoneNumber = request.phoneNumber
+
+        val saved = visitorProfileRepository.save(profile)
+        val visitCount = visitorRepository
+            .countBySiteIdAndVisitorProfileId(requestedBy.site.id!!, profileId)
+
+        return VisitorProfileResponse(
+            id = saved.id!!,
+            name = saved.name,
+            phoneNumber = saved.phoneNumber,
+            siteId = saved.site.id!!,
+            visitCount = visitCount.toInt()
+        )
     }
 }
