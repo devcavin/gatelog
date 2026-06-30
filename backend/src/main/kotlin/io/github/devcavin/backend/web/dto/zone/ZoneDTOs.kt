@@ -3,8 +3,7 @@ package io.github.devcavin.backend.web.dto.zone
 import io.github.devcavin.backend.domain.model.Zone
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
-import java.util.UUID
+import java.util.*
 
 data class ZoneRequest(
     @field:NotBlank

@@ -21,7 +21,6 @@ data class CreateUserRequest(
     @field:NotBlank
     val roleName: String,
 
-    @field:NotBlank
     val siteId: UUID
 )
 

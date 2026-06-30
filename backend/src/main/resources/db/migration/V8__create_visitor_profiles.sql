@@ -8,9 +8,9 @@ CREATE TABLE visitor_profiles(
     CONSTRAINT uq_visitor_profiles_phone_site UNIQUE(phone_number, site_id)
 );
 
-CREATE INDEX idx_visitor_profiles_phone ON visitor_profiles(phone_number)
-CREATE INDEX idx_visitor_profiles_site_id ON visitor_profiles(site_id)
+CREATE INDEX idx_visitor_profiles_phone ON visitor_profiles(phone_number);
+CREATE INDEX idx_visitor_profiles_site_id ON visitor_profiles(site_id);
 
 ALTER TABLE visitors ADD column visitor_profile_id UUID REFERENCES visitor_profiles(id);
 
-CREATE INDEX idx_visitors_profile_id ON visitors(visitor_profile_id)
+CREATE INDEX idx_visitors_profile_id ON visitors(visitor_profile_id);
