@@ -26,7 +26,7 @@ class JwtAuthenticationFilter(
             val userId = jwtTokenProvider.getUserIdFromToken(token)
             val role = jwtTokenProvider.getRoleFromToken(token)
 
-            val user = userRepository.findById(userId).orElse(null)
+            val user = userRepository.findByIdWithRoleAndSite(userId)
 
             if (user != null && user.isActive) {
                 val authorities = listOf(SimpleGrantedAuthority("ROLE_$role"))

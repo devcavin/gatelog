@@ -50,10 +50,13 @@ class UserService(
 
     @Transactional(readOnly = true)
     fun getAll(requestedBy: User): List<UserResponse> {
-        return when (requestedBy.role.name) {
-            "SUPER_ADMIN" -> userRepository.findAll().map { it.toResponse() }
+        val roleName = requestedBy.role.name
+        val siteId = requestedBy.site.id!!
+
+        return when (roleName) {
+            "SUPER_ADMIN" -> userRepository.findAllWithRole().map { it.toResponse() }
             else -> userRepository
-                .findAllBySiteId(requestedBy.site.id!!)
+                .findAllBySiteIdWithRole(siteId)
                 .map { it.toResponse() }
         }
     }
