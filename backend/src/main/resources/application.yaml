@@ -27,6 +27,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
 server:
   port: 8080
 

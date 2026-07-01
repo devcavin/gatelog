@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -17,6 +18,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorized(e: UnauthorizedException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
         return build(HttpStatus.UNAUTHORIZED, e.message ?: "Unauthorized", request)
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDenied(e: AccessDeniedException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
+        return build(HttpStatus.FORBIDDEN, e.message ?: "Forbidden", request)
     }
 
     @ExceptionHandler(AccountDisabledException::class)
@@ -54,7 +60,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException::class)
     fun handleBadCredentials(e: BadCredentialsException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
-        return build(HttpStatus.UNAUTHORIZED, e.message ?: "Invalid username or password", request)
+        return build(HttpStatus.BAD_REQUEST, e.message ?: "Invalid username or password", request)
     }
 
     @ExceptionHandler(Exception::class)
@@ -64,6 +70,20 @@ class GlobalExceptionHandler {
         return build(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "An unexpected error occurred",
+            request
+        )
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException::class)
+    fun handleAuthorizationDenied(
+        e: AuthorizationDeniedException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        logger.warn("Authorization denied for {}: {}", request.requestURI, e.message)
+
+        return build(
+            HttpStatus.FORBIDDEN,
+            "Access denied",
             request
         )
     }
