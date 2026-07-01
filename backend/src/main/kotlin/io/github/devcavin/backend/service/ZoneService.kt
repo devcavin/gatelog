@@ -22,7 +22,7 @@ class ZoneService(
         val site = siteRepository.findById(siteId)
             .orElseThrow { ResourceNotFoundException("Site", siteId) }
 
-        if (!zoneRepository.existsBySiteIdAndName(siteId, request.name)) {
+        if (zoneRepository.existsBySiteIdAndName(siteId, request.name)) {
             throw ConflictException("Zone with this name already exists under this site")
         }
 

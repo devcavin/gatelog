@@ -63,7 +63,7 @@ class DashboardService(
             siteId = siteId,
             visitStatus = checkedInStatus,
             pageable = PageRequest.of(0, 10,
-                Sort.by(Sort.Direction.DESC, "checkoutTime"))
+                Sort.by(Sort.Direction.DESC, "checkInTime"))
         ).content.map { it.toResponse() }
 
         val overdueVisitors = visitorRepository.findAllOverdue(
@@ -75,7 +75,7 @@ class DashboardService(
             siteId = siteId,
             visitStatus = checkedOutStatus,
             pageable = PageRequest.of(0, 10,
-                Sort.by(Sort.Direction.DESC, "checkoutTime"))
+                Sort.by(Sort.Direction.DESC, "checkOutTime"))
         ).content.map { it.toResponse() }
 
         return DashboardFeed(
