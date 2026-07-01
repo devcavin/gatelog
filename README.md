@@ -240,10 +240,10 @@ ghcr.io/devcavin/gatelog-backend:<short-sha>
 - [x] Role-based access control (Super Admin, Manager, Staff)
 - [x] User registration endpoint with role enforcement
 - [x] CI pipeline with GitHub Actions
-- [ ] Visitor registration and check-in/check-out
+- [x] Visitor registration and check-in/check-out
 - [ ] Real-time dashboard endpoints
-- [ ] Visitor search with dynamic filters
-- [ ] CSV export
+- [x] Visitor search with dynamic filters
+- [x] CSV export
 - [ ] React frontend
 
 ### Phase 2 - Intelligence Layer _(planned)_
