@@ -13,9 +13,9 @@ import io.github.devcavin.backend.web.dto.user.CreateUserRequest
 import io.github.devcavin.backend.web.dto.user.UpdateUserRequest
 import io.github.devcavin.backend.web.dto.user.UserResponse
 import io.github.devcavin.backend.web.dto.user.toResponse
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import io.github.devcavin.backend.common.exception.AccessDeniedException
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
@@ -50,22 +50,24 @@ class UserService(
 
     @Transactional(readOnly = true)
     fun getAll(requestedBy: User): List<UserResponse> {
-        val roleName = requestedBy.role.name
-        val siteId = requestedBy.site.id!!
 
-        return when (roleName) {
+        return when (requestedBy.role.name) {
             "SUPER_ADMIN" -> userRepository.findAllWithRole().map { it.toResponse() }
-            else -> userRepository
-                .findAllBySiteIdWithRole(siteId)
+            "MANAGER" -> userRepository
+                .findAllBySiteIdWithRole(requestedBy.site.id!!)
+                .filter { it.role.name == "STAFF" }
                 .map { it.toResponse() }
+            else -> emptyList()
         }
     }
 
     @Transactional(readOnly = true)
     fun getById(requestedBy: User, userId: UUID): UserResponse {
-        val user = userRepository.findById(userId)
+        val user = userRepository.findByIdWithRole(userId)
             .orElseThrow { ResourceNotFoundException("User", userId) }
-        enforceSiteBoundary(requestedBy, user)
+
+        enforceVisibilityRules(requestedBy, user)
+
         return user.toResponse()
     }
 
@@ -78,7 +80,7 @@ class UserService(
         val target = userRepository.findById(userId)
             .orElseThrow { ResourceNotFoundException("User", userId) }
 
-        enforceSiteBoundary(requestedBy, target)
+        enforceVisibilityRules(requestedBy, target)
         enforceUpdateRules(requestedBy, target, request.roleName)
 
         if (request.email != target.email &&
@@ -105,7 +107,7 @@ class UserService(
         val target = userRepository.findById(userId)
             .orElseThrow { ResourceNotFoundException("User", userId) }
 
-        enforceSiteBoundary(requestedBy, target)
+        enforceVisibilityRules(requestedBy, target)
         enforceDeactivationRules(requestedBy, target)
 
         target.isActive = false
@@ -116,7 +118,7 @@ class UserService(
     fun activate(requestedBy: User, userId: UUID): UserResponse {
         val target = userRepository.findById(userId)
             .orElseThrow { ResourceNotFoundException("User", userId) }
-        enforceSiteBoundary(requestedBy, target)
+        enforceVisibilityRules(requestedBy, target)
         target.isActive = true
         return userRepository.save(target).toResponse()
     }
@@ -151,14 +153,6 @@ class UserService(
         }
     }
 
-    private fun enforceSiteBoundary(requestedBy: User, target: User) {
-        if (requestedBy.role.name != "SUPER_ADMIN" &&
-            requestedBy.site.id != target.site.id
-        ) {
-            throw AccessDeniedException("User does not belong to your site")
-        }
-    }
-
     private fun enforceDeactivationRules(requestedBy: User, target: User) {
         when (requestedBy.role.name) {
             "SUPER_ADMIN" -> Unit
@@ -184,6 +178,18 @@ class UserService(
                     throw AccessDeniedException("Managers cannot change role beyond Staff")
             }
             else -> throw AccessDeniedException("Insufficient privilege to update users")
+        }
+    }
+
+    private fun enforceVisibilityRules(requestedBy: User, target: User) {
+        if (requestedBy.role.name == "SUPER_ADMIN") return
+
+        if (requestedBy.site.id != target.site.id) {
+            throw AccessDeniedException("User doesnt belong to your site")
+        }
+
+        if (requestedBy.role.name == "MANAGER" && target.role.name != "STAFF") {
+            throw AccessDeniedException("Managers can only view staff accounts")
         }
     }
 }

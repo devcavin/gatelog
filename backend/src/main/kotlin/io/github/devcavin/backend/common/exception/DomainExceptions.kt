@@ -1,14 +1,16 @@
 package io.github.devcavin.backend.common.exception
 
+import org.springframework.security.authentication.BadCredentialsException
+
 // base type
 sealed class DomainException(message: String) : RuntimeException(message)
 
 // 401 — bad credentials or invalid/expired tokens
 sealed class UnauthorizedException(message: String): DomainException(message)
 
-class InvalidCredentialsException : UnauthorizedException("Invalid username or password")
+class InvalidCredentialsException : BadCredentialsException("Invalid username or password")
 
-class InvalidRefreshTokenException : UnauthorizedException("Invalid or expired refresh token")
+class InvalidRefreshTokenException : BadCredentialsException("Invalid or expired refresh token")
 
 // 403 - authenticated but !permitted
 class AccountDisabledException : DomainException("Account is disabled")
@@ -21,3 +23,5 @@ class ConflictException(message: String) : DomainException(message)
 
 // 422 - semantically invalid request (e.g. checking out already checked out visitor)
 class InvalidStateException(message: String) : DomainException(message)
+
+class AccessDeniedException(message: String) : RuntimeException(message)
