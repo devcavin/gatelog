@@ -15,7 +15,7 @@
 
 # Gatelog - Digital Visitor Management System
 
-> A production-grade visitor management system built to replace paper logbooks with a fast, searchable, and accountable web application.
+> A visitor management system built to replace paper logbooks with a fast, searchable, and accountable web application.
 ---
 
 ## What is Gatelog?
@@ -194,7 +194,7 @@ Role enforcement happens at two layers: `@PreAuthorize` on controllers (HTTP lev
 ```bash
 # 1. clone
 git clone https://github.com/devcavin/gatelog.git
-cd gatelog/backend
+cd gatelog
 
 # 2. start postgres
 docker compose up -d
