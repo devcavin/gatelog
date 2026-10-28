@@ -233,15 +233,15 @@ Flyway runs all migrations automatically on startup. The database is seeded with
 
 ## CI/CD
 
-Every push to `main` that touches `backend/**`:
+Every push to `main` that touches root directory `./**`:
 
 1. **Test** - runs the full test suite with Testcontainers (real Postgres)
 2. **Build image** - multi-stage Docker build, pushed to GHCR with SHA tag and `latest`
 3. **Deploy image** - deploying the build image to render
 
 ```
-ghcr.io/devcavin/gatelog-backend:latest
-ghcr.io/devcavin/gatelog-backend:<short-sha>
+ghcr.io/devcavin/gatelog:latest
+ghcr.io/devcavin/gatelog:<short-sha>
 ```
 
 ---
